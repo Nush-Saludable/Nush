@@ -1,0 +1,226 @@
+{
+  "products": [
+    {
+      "code": "1000",
+      "name": "Mix Cervecero",
+      "cat": "Frutos Secos",
+      "cost": 100000
+    },
+    {
+      "code": "1001",
+      "name": "Mix Clásico",
+      "cat": "Frutos Secos",
+      "cost": 10775
+    },
+    {
+      "code": "1002",
+      "name": "Mix Patagónico",
+      "cat": "Frutos Secos",
+      "cost": 15100
+    },
+    {
+      "code": "1003",
+      "name": "Mix Seco",
+      "cat": "Frutos Secos",
+      "cost": 12895
+    },
+    {
+      "code": "1004",
+      "name": "Mix Seco Premium",
+      "cat": "Frutos Secos",
+      "cost": 19710
+    },
+    {
+      "code": "1005",
+      "name": "Mix Tropical",
+      "cat": "Frutos Secos",
+      "cost": 12630
+    },
+    {
+      "code": "1100",
+      "name": "Avena Extra Fina",
+      "cat": "Granos",
+      "cost": 1650
+    },
+    {
+      "code": "1101",
+      "name": "Avena Gruesa",
+      "cat": "Granos",
+      "cost": 1650
+    },
+    {
+      "code": "1103",
+      "name": "Avena Instantánea",
+      "cat": "Granos",
+      "cost": 1650
+    },
+    {
+      "code": "1105",
+      "name": "Maíz Frito Salado",
+      "cat": "Granos",
+      "cost": 9400
+    },
+    {
+      "code": "1106",
+      "name": "Maíz Pisingallo",
+      "cat": "Granos",
+      "cost": 1150
+    },
+    {
+      "code": "1110",
+      "name": "Maíz Blanco Pisado",
+      "cat": "Granos",
+      "cost": 2085
+    },
+    {
+      "code": "1111",
+      "name": "Salvado de Trigo",
+      "cat": "Cereales",
+      "cost": 840
+    },
+    {
+      "code": "1112",
+      "name": "Garbanzo Frito Salado",
+      "cat": "Cereales",
+      "cost": 7940
+    },
+    {
+      "code": "1200",
+      "name": "Fécula de Maíz",
+      "cat": "Harinas",
+      "cost": 1620
+    },
+    {
+      "code": "1201",
+      "name": "Fécula de Mandioca",
+      "cat": "Harinas",
+      "cost": 2110
+    },
+    {
+      "code": "1202",
+      "name": "Harina Integral",
+      "cat": "Harinas",
+      "cost": 820
+    },
+    {
+      "code": "1203",
+      "name": "Harina de Algarroba",
+      "cat": "Harinas",
+      "cost": 4250
+    },
+    {
+      "code": "1204",
+      "name": "Harina de Almendras con Piel Pura",
+      "cat": "Harinas",
+      "cost": 14850
+    },
+    {
+      "code": "1205",
+      "name": "Harina de Almendras sin Piel Rebajada",
+      "cat": "Harinas",
+      "cost": 3320
+    },
+    {
+      "code": "1206",
+      "name": "Harina de Arroz",
+      "cat": "Harinas",
+      "cost": 1260
+    },
+    {
+      "code": "1207",
+      "name": "Harina de Avena",
+      "cat": "Harinas",
+      "cost": 1700
+    },
+    {
+      "code": "1208",
+      "name": "Harina de Chía",
+      "cat": "Harinas",
+      "cost": 1075
+    },
+    {
+      "code": "1209",
+      "name": "Harina de Coco Pura",
+      "cat": "Harinas",
+      "cost": 5585
+    },
+    {
+      "code": "1210",
+      "name": "Harina de Garbanzos",
+      "cat": "Harinas",
+      "cost": 895
+    },
+    {
+      "code": "1211",
+      "name": "Harina de Lino",
+      "cat": "Harinas",
+      "cost": 1300
+    },
+    {
+      "code": "1212",
+      "name": "Texturizado de Soja Fino",
+      "cat": "Soja",
+      "cost": 2025
+    },
+    {
+      "code": "1218",
+      "name": "Harina de Pistacho Rebajada",
+      "cat": "Harinas",
+      "cost": 6615
+    },
+    {
+      "code": "1219",
+      "name": "Texturizado de Soja Medio",
+      "cat": "Soja",
+      "cost": 2025
+    },
+    {
+      "code": "1220",
+      "name": "Harina de Almendras sin Piel Pura",
+      "cat": "Harinas",
+      "cost": 23625
+    },
+    {
+      "code": "1221",
+      "name": "Harina de Almendras con Piel Rebajada",
+      "cat": "Harinas",
+      "cost": 3000
+    },
+    {
+      "code": "1223",
+      "name": "Harina de Trigo Sarraceno",
+      "cat": "Harinas",
+      "cost": 2435
+    },
+    {
+      "code": "1224",
+      "name": "Harina Integral Orgánica Dicomere",
+      "cat": "Harinas",
+      "cost": 5000
+    },
+    {
+      "code": "1300",
+      "name": "Arveja Partida",
+      "cat": "Legumbres",
+      "cost": 1050
+    },
+    {
+      "code": "1301",
+      "name": "Garbanzos",
+      "cat": "Legumbres",
+      "cost": 1480
+    }
+  ],
+  "config": {
+    "margin": 40,
+    "packaging": {
+      "100": 0,
+      "500": 0,
+      "1000": 0
+    },
+    "whatsapp": "5492612173125",
+    "mayah_api": "https://mayah.co/api/v1/publico/list_public/link/cfec25a072e111eb94fee71bd50f2bf6",
+    "promotions": []
+  },
+  "updatedAt": "2026-10-01T14:33:32.291Z"
+}
