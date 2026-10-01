@@ -37,11 +37,14 @@ app.get("/api/catalog",(req,res)=>{
   }));
   res.json({products,updatedAt:d.updatedAt});
 });
+
+// Margen comercial: se suma el porcentaje indicado al costo.
+// Ejemplo: costo $1.480 con 40% => $2.072.
 function publicPrice(p,g,c){
   const margin=Number(p.margin??c.margin??40);
   const cost=Number(p.cost||0);
   const pack=Number((c.packaging||{})[g]||0);
-  return Math.round(((cost*g/1000)+pack)/(1-margin/100));
+  return Math.round((cost*g/1000+pack)*(1+margin/100));
 }
 
 app.get("/api/admin/catalog",auth,(req,res)=>res.json(readCatalog()));
