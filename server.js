@@ -4,10 +4,14 @@ const path=require("path");
 const fs=require("fs");
 const app=express();
 app.use(cors());
-app.use(express.json({limit:"15mb"}));
+app.use(express.json({limit:"50mb"}));
 
 const MAYAH="https://mayah.co/api/v1/publico/list_public/link/cfec25a072e111eb94fee71bd50f2bf6";
-const DATA=path.join(__dirname,"catalog-data.json");
+// En Render, DATA_DIR debe apuntar al Persistent Disk (por ejemplo /data).
+// De esta forma catálogo y fotos sobreviven a reinicios y nuevos deploys.
+const DATA_DIR=process.env.DATA_DIR || (fs.existsSync("/data") ? "/data" : __dirname);
+fs.mkdirSync(DATA_DIR,{recursive:true});
+const DATA=path.join(DATA_DIR,"catalog-data.json");
 const ADMIN_PASSWORD=process.env.ADMIN_PASSWORD||"nutrilife";
 
 function readCatalog(){
@@ -30,76 +34,21 @@ function auth(req,res,next){
 
 app.get("/api/catalog",(req,res)=>{
   const d=readCatalog();
-  const products=d.products.map(p=>({
-    code:p.code,name:p.name,cat:p.cat,desc:p.desc||"",image:p.image||null,
-    available:p.available!==false,
-    prices:{100:publicPrice(p,100,d.config),500:publicPrice(p,500,d.config),1000:publicPrice(p,1000,d.config)}
-  }));
+  const products=d.products.map(p=>({code:p.code,name:p.name,cat:p.cat,desc:p.desc||"",image:p.image||null,available:p.available!==false,prices:{100:publicPrice(p,100,d.config),500:publicPrice(p,500,d.config),1000:publicPrice(p,1000,d.config)}}));
   res.json({products,updatedAt:d.updatedAt,promotions:d.config?.promotions||[]});
 });
-
-// Precio de venta: costo proporcional al gramaje + packaging opcional + margen sobre el costo.
-// Ejemplo: costo $1.480 con 40% => $2.072 sin packaging.
-function publicPrice(p,g,c){
-  const margin=Number(p.margin??c.margin??40);
-  const cost=Number(p.cost||0);
-  const pack=Number((c.packaging||{})[g]||0);
-  return Math.round(cost*g/1000*(1+margin/100)+pack);
-}
+function publicPrice(p,g,c){const margin=Number(p.margin??c.margin??40);const cost=Number(p.cost||0);const pack=Number((c.packaging||{})[g]||0);return Math.round(cost*g/1000*(1+margin/100)+pack)}
 
 app.get("/api/admin/catalog",auth,(req,res)=>res.json(readCatalog()));
-app.put("/api/admin/catalog",auth,(req,res)=>{
-  try{
-    const body=req.body;
-    if(!body||!Array.isArray(body.products)||!body.config)return res.status(400).json({ok:false,message:"Datos inválidos"});
-    body.config.promotions=Array.isArray(body.config.promotions)?body.config.promotions:[];
-    writeCatalog({products:body.products,config:body.config});
-    res.json({ok:true,updatedAt:readCatalog().updatedAt});
-  }catch(e){res.status(500).json({ok:false,message:e.message});}
-});
+app.put("/api/admin/catalog",auth,(req,res)=>{try{const body=req.body;if(!body||!Array.isArray(body.products)||!body.config)return res.status(400).json({ok:false,message:"Datos inválidos"});body.config.promotions=Array.isArray(body.config.promotions)?body.config.promotions:[];writeCatalog({products:body.products,config:body.config});res.json({ok:true,updatedAt:readCatalog().updatedAt,persistentPath:DATA_DIR})}catch(e){res.status(500).json({ok:false,message:e.message})}});
 
-app.get("/api/mayah",async(req,res)=>{
-  try{const r=await fetch(MAYAH,{cache:"no-store"});const j=await r.json();res.json(j);}
-  catch(e){res.status(502).json({status:"ERROR",message:"No se pudo consultar Mayah"});}
-});
+app.get("/api/mayah",async(req,res)=>{try{const r=await fetch(MAYAH,{cache:"no-store"});const j=await r.json();res.json(j)}catch(e){res.status(502).json({status:"ERROR",message:"No se pudo consultar Mayah"})}});
+app.post("/api/admin/sync-mayah",auth,async(req,res)=>{try{const r=await fetch(MAYAH,{cache:"no-store"});const j=await r.json();const d=readCatalog();const incoming=j.response?.productos||[];let changed=0;for(const x of incoming){const p=d.products.find(y=>String(y.code)===String(x.codigo));if(p&&x.precio!=null){p.cost=Number(x.precio);changed++}if(p&&x.imagen&&!p.image)p.image=x.imagen}writeCatalog(d);res.json({ok:true,changed,updatedAt:d.updatedAt})}catch(e){res.status(502).json({ok:false,message:"No se pudo sincronizar Mayah"})}});
 
-app.post("/api/admin/sync-mayah",auth,async(req,res)=>{
-  try{
-    const r=await fetch(MAYAH,{cache:"no-store"});
-    const j=await r.json();
-    const d=readCatalog();
-    const incoming=j.response?.productos||[];
-    let changed=0;
-    for(const x of incoming){
-      const p=d.products.find(y=>String(y.code)===String(x.codigo));
-      if(p&&x.precio!=null){p.cost=Number(x.precio);changed++;}
-      if(p&&x.imagen&&!p.image)p.image=x.imagen;
-    }
-    writeCatalog(d);
-    res.json({ok:true,changed,updatedAt:d.updatedAt});
-  }catch(e){res.status(502).json({ok:false,message:"No se pudo sincronizar Mayah"});}
-});
-
-// Logo robusto: si Render no encuentra el archivo, lo sirve directamente desde el servidor.
 const LOGO_SVG=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1350" role="img" aria-label="NUTRILIFE"><rect width="1080" height="1350" fill="#5b610b"/><g fill="#f7efe3" font-family="Arial,Helvetica,sans-serif" font-weight="900" text-anchor="middle"><text x="540" y="690" font-size="150" letter-spacing="4">NUTRILIFE</text></g><g fill="none" stroke="#f7efe3" stroke-width="28" stroke-linecap="round"><path d="M425 755 C470 850 610 875 690 790"/></g><path d="M700 555 C715 510 735 475 770 450 C765 500 745 540 710 575 Z" fill="#f7efe3"/><path d="M710 575 C725 535 745 505 765 490" fill="none" stroke="#5b610b" stroke-width="12" stroke-linecap="round"/></svg>`;
-app.get("/logo.svg",(req,res)=>{
-  res.set("Cache-Control","no-store");
-  res.type("image/svg+xml");
-  const file=path.join(__dirname,"logo.svg");
-  if(fs.existsSync(file))return res.send(fs.readFileSync(file,"utf8"));
-  return res.send(LOGO_SVG);
-});
+app.get("/logo.svg",(req,res)=>{res.set("Cache-Control","no-store");res.type("image/svg+xml");const file=path.join(__dirname,"logo.svg");if(fs.existsSync(file))return res.send(fs.readFileSync(file,"utf8"));return res.send(LOGO_SVG)});
 
-app.get(["/","/index.html"],(req,res)=>{
-  try{
-    const html=fs.readFileSync(path.join(__dirname,"index.html"),"utf8");
-    const brand=`<div class="nutrilife-brand" aria-label="NUTRILIFE"><img src="/logo.svg?v=2" alt="NUTRILIFE"></div>`;
-    const styles=`<style>.nutrilife-brand{width:100%;height:96px;background:#5a600b;display:flex;align-items:center;justify-content:center;overflow:hidden}.nutrilife-brand img{width:170px;height:96px;object-fit:contain;display:block}.nutrilife-brand+nav{margin-top:0}@media(max-width:600px){.nutrilife-brand{height:82px}.nutrilife-brand img{width:145px;height:82px}}</style>`;
-    const out=html.replace("<body>","<body>"+styles+brand);
-    res.type("html").send(out);
-  }catch(e){res.status(500).send("No se pudo cargar NUTRILIFE");}
-});
-
+app.get(["/","/index.html"],(req,res)=>{try{const html=fs.readFileSync(path.join(__dirname,"index.html"),"utf8");const brand=`<div class="nutrilife-brand" aria-label="NUTRILIFE"><img src="/logo.svg?v=2" alt="NUTRILIFE"></div>`;const styles=`<style>.nutrilife-brand{width:100%;height:96px;background:#5a600b;display:flex;align-items:center;justify-content:center;overflow:hidden}.nutrilife-brand img{width:170px;height:96px;object-fit:contain;display:block}.nutrilife-brand+nav{margin-top:0}@media(max-width:600px){.nutrilife-brand{height:82px}.nutrilife-brand img{width:145px;height:82px}}</style>`;res.type("html").send(html.replace("<body>","<body>"+styles+brand))}catch(e){res.status(500).send("No se pudo cargar NUTRILIFE")}});
 app.use(express.static(__dirname));
 app.get(/.*/,(req,res)=>res.sendFile(path.join(__dirname,"index.html")));
 app.listen(process.env.PORT||3000,()=>console.log("NUTRILIFE lista"));
