@@ -35,14 +35,16 @@ app.get("/api/catalog",(req,res)=>{
     available:p.available!==false,
     prices:{100:publicPrice(p,100,d.config),500:publicPrice(p,500,d.config),1000:publicPrice(p,1000,d.config)}
   }));
-  res.json({products,updatedAt:d.updatedAt,promotions:d.config.promotions||[]});
+  res.json({products,updatedAt:d.updatedAt,promotions:d.config?.promotions||[]});
 });
 
+// Precio de venta: costo proporcional al gramaje + packaging opcional + margen sobre el costo.
+// Ejemplo: costo $1.480 con 40% => $2.072 sin packaging.
 function publicPrice(p,g,c){
   const margin=Number(p.margin??c.margin??40);
   const cost=Number(p.cost||0);
   const pack=Number((c.packaging||{})[g]||0);
-  return Math.round((cost*g/1000+pack)*(1+margin/100));
+  return Math.round(cost*g/1000*(1+margin/100)+pack);
 }
 
 app.get("/api/admin/catalog",auth,(req,res)=>res.json(readCatalog()));
@@ -50,6 +52,7 @@ app.put("/api/admin/catalog",auth,(req,res)=>{
   try{
     const body=req.body;
     if(!body||!Array.isArray(body.products)||!body.config)return res.status(400).json({ok:false,message:"Datos inválidos"});
+    body.config.promotions=Array.isArray(body.config.promotions)?body.config.promotions:[];
     writeCatalog({products:body.products,config:body.config});
     res.json({ok:true,updatedAt:readCatalog().updatedAt});
   }catch(e){res.status(500).json({ok:false,message:e.message});}
