@@ -79,6 +79,17 @@ app.post("/api/admin/sync-mayah",auth,async(req,res)=>{
   }catch(e){res.status(502).json({ok:false,message:"No se pudo sincronizar Mayah"});}
 });
 
+// Presenta el logo enviado por el propietario en la página pública, sin quitar el encabezado existente.
+app.get(["/","/index.html"],(req,res)=>{
+  try{
+    const html=fs.readFileSync(path.join(__dirname,"index.html"),"utf8");
+    const brand=`<div class="nutrilife-brand" aria-label="NUTRILIFE"><img src="/logo.svg" alt="NUTRILIFE"></div>`;
+    const styles=`<style>.nutrilife-brand{width:100%;height:96px;background:#5a600b;display:flex;align-items:center;justify-content:center;overflow:hidden}.nutrilife-brand img{width:100%;height:100%;object-fit:cover;object-position:center 50%;display:block}.nutrilife-brand+nav{margin-top:0}@media(max-width:600px){.nutrilife-brand{height:82px}}</style>`;
+    const out=html.replace("<body>","<body>"+styles+brand);
+    res.type("html").send(out);
+  }catch(e){res.status(500).send("No se pudo cargar NUTRILIFE");}
+});
+
 app.use(express.static(__dirname));
 app.get(/.*/,(req,res)=>res.sendFile(path.join(__dirname,"index.html")));
 app.listen(process.env.PORT||3000,()=>console.log("NUTRILIFE lista"));
