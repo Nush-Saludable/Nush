@@ -35,11 +35,9 @@ app.get("/api/catalog",(req,res)=>{
     available:p.available!==false,
     prices:{100:publicPrice(p,100,d.config),500:publicPrice(p,500,d.config),1000:publicPrice(p,1000,d.config)}
   }));
-  res.json({products,updatedAt:d.updatedAt});
+  res.json({products,updatedAt:d.updatedAt,promotions:d.config.promotions||[]});
 });
 
-// Margen comercial: se suma el porcentaje indicado al costo.
-// Ejemplo: costo $1.480 con 40% => $2.072.
 function publicPrice(p,g,c){
   const margin=Number(p.margin??c.margin??40);
   const cost=Number(p.cost||0);
@@ -51,7 +49,7 @@ app.get("/api/admin/catalog",auth,(req,res)=>res.json(readCatalog()));
 app.put("/api/admin/catalog",auth,(req,res)=>{
   try{
     const body=req.body;
-    if(!body||!Array.isArray(body.products)||!body.config) return res.status(400).json({ok:false,message:"Datos inválidos"});
+    if(!body||!Array.isArray(body.products)||!body.config)return res.status(400).json({ok:false,message:"Datos inválidos"});
     writeCatalog({products:body.products,config:body.config});
     res.json({ok:true,updatedAt:readCatalog().updatedAt});
   }catch(e){res.status(500).json({ok:false,message:e.message});}
@@ -79,12 +77,21 @@ app.post("/api/admin/sync-mayah",auth,async(req,res)=>{
   }catch(e){res.status(502).json({ok:false,message:"No se pudo sincronizar Mayah"});}
 });
 
-// Presenta el logo enviado por el propietario en la página pública, sin quitar el encabezado existente.
+// Logo robusto: si Render no encuentra el archivo, lo sirve directamente desde el servidor.
+const LOGO_SVG=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1350" role="img" aria-label="NUTRILIFE"><rect width="1080" height="1350" fill="#5b610b"/><g fill="#f7efe3" font-family="Arial,Helvetica,sans-serif" font-weight="900" text-anchor="middle"><text x="540" y="690" font-size="150" letter-spacing="4">NUTRILIFE</text></g><g fill="none" stroke="#f7efe3" stroke-width="28" stroke-linecap="round"><path d="M425 755 C470 850 610 875 690 790"/></g><path d="M700 555 C715 510 735 475 770 450 C765 500 745 540 710 575 Z" fill="#f7efe3"/><path d="M710 575 C725 535 745 505 765 490" fill="none" stroke="#5b610b" stroke-width="12" stroke-linecap="round"/></svg>`;
+app.get("/logo.svg",(req,res)=>{
+  res.set("Cache-Control","no-store");
+  res.type("image/svg+xml");
+  const file=path.join(__dirname,"logo.svg");
+  if(fs.existsSync(file))return res.send(fs.readFileSync(file,"utf8"));
+  return res.send(LOGO_SVG);
+});
+
 app.get(["/","/index.html"],(req,res)=>{
   try{
     const html=fs.readFileSync(path.join(__dirname,"index.html"),"utf8");
-    const brand=`<div class="nutrilife-brand" aria-label="NUTRILIFE"><img src="/logo.svg" alt="NUTRILIFE"></div>`;
-    const styles=`<style>.nutrilife-brand{width:100%;height:96px;background:#5a600b;display:flex;align-items:center;justify-content:center;overflow:hidden}.nutrilife-brand img{width:100%;height:100%;object-fit:cover;object-position:center 50%;display:block}.nutrilife-brand+nav{margin-top:0}@media(max-width:600px){.nutrilife-brand{height:82px}}</style>`;
+    const brand=`<div class="nutrilife-brand" aria-label="NUTRILIFE"><img src="/logo.svg?v=2" alt="NUTRILIFE"></div>`;
+    const styles=`<style>.nutrilife-brand{width:100%;height:96px;background:#5a600b;display:flex;align-items:center;justify-content:center;overflow:hidden}.nutrilife-brand img{width:170px;height:96px;object-fit:contain;display:block}.nutrilife-brand+nav{margin-top:0}@media(max-width:600px){.nutrilife-brand{height:82px}.nutrilife-brand img{width:145px;height:82px}}</style>`;
     const out=html.replace("<body>","<body>"+styles+brand);
     res.type("html").send(out);
   }catch(e){res.status(500).send("No se pudo cargar NUTRILIFE");}
