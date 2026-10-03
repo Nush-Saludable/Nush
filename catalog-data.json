@@ -245,15 +245,15 @@
     }
   ],
   "config": {
-    "margin": 40,
+    "margin": 90,
     "packaging": {
-      "100": 0,
-      "500": 0,
-      "1000": 0
+      "100": 30,
+      "500": 20,
+      "1000": 10
     },
     "whatsapp": "5492612173125",
     "mayah_api": "https://mayah.co/api/v1/publico/list_public/link/cfec25a072e111eb94fee71bd50f2bf6",
     "promotions": []
   },
-  "updatedAt": "2026-10-03T20:12:37.295Z"
+  "updatedAt": "2026-10-03T20:13:40.662Z"
 }
