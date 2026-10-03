@@ -517,7 +517,7 @@
     {
       "code": "LOCAL-1791061739889",
       "name": "Chips de Banana",
-      "cat": "Frutos Secos",
+      "cat": "Frutos Deshidratados",
       "cost": 12825,
       "margin": 90,
       "desc": "",
@@ -646,5 +646,5 @@
     "mayah_api": "https://mayah.co/api/v1/publico/list_public/link/cfec25a072e111eb94fee71bd50f2bf6",
     "promotions": []
   },
-  "updatedAt": "2026-10-03T21:23:14.171Z"
+  "updatedAt": "2026-10-03T21:23:55.667Z"
 }
