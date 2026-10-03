@@ -248,7 +248,7 @@
       "code": "LOCAL-1791059096154",
       "name": "Arroz Integral",
       "cat": "Arroz",
-      "cost": 0,
+      "cost": 1230,
       "margin": 90,
       "desc": "",
       "available": true,
@@ -266,5 +266,5 @@
     "mayah_api": "https://mayah.co/api/v1/publico/list_public/link/cfec25a072e111eb94fee71bd50f2bf6",
     "promotions": []
   },
-  "updatedAt": "2026-10-03T20:25:32.169Z"
+  "updatedAt": "2026-10-03T20:26:18.778Z"
 }
