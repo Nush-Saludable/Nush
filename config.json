@@ -5,6 +5,28 @@
     "500": 0,
     "1000": 0
   },
-  "whatsapp": "5492612173125",
-  "mayah_api": "https://mayah.co/api/v1/publico/list_public/link/cfec25a072e111eb94fee71bd50f2bf6"
+  "whatsapp": "5492613631574",
+  "mayah_api": "https://mayah.co/api/v1/publico/list_public/link/cfec25a072e111eb94fee71bd50f2bf6",
+  "checkout": {
+    "promoCodes": [
+      {
+        "code": "PRIMERACOMPRA20",
+        "type": "percent",
+        "value": 20,
+        "label": "20% de descuento · Primera compra",
+        "active": true
+      }
+    ],
+    "shipping": {
+      "granMendozaPercent": 20,
+      "granMendozaPostalCodes": ["5500","5501","5503","5504","5505","5507","5509","5511","5513","5515","5517","5519","5521","5523","5525","5527","5529","5531","5533","5539","5541","5544","5547"],
+      "pickupLabel": "Retiro en domicilio · Sin costo"
+    },
+    "payment": {
+      "method": "Transferencia a Mercado Pago",
+      "alias": "",
+      "cvu": "",
+      "holder": ""
+    }
+  }
 }
