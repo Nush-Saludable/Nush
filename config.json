@@ -24,9 +24,10 @@
     },
     "payment": {
       "method": "Transferencia a Mercado Pago",
-      "alias": "",
-      "cvu": "",
-      "holder": ""
+      "alias": "nutrilife.frutos",
+      "cvu": "0000003100066704825248",
+      "holder": "Maria Celeste Calderon",
+      "cuil": "23-29617053-4"
     }
   }
 }
