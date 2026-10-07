@@ -50,7 +50,7 @@ async function doLogin(){
 function legacyPrice(p,g){return Math.round(Number(p.cost||0)*g/1000*(1+Number(p['margin'+g]??p.margin??40)/100))}
 function isSpice(p){return /especias|condimentos/i.test(String(p.cat||''))}
 function price(p,g){const key='price'+g;return p[key]!=null&&p[key]!==''?Number(p[key]):legacyPrice(p,g)}
-function sizeConfig(p){return isSpice(p)?[{g:50,l:'50 g',key:'price50'},{g:200,l:'200 g',key:'price200'},{g:1000,l:'1 kg',key:'price1000'}]:[{g:100,l:'100 g',key:'price100'},{g:500,l:'500 g',key:'price500'},{g:1000,l:'1 kg',key:'price1000'}]}
+function sizeConfig(p){return isSpice(p)?[{g:50,l:'50 g',key:'price100'},{g:200,l:'200 g',key:'price500'},{g:1000,l:'1 kg',key:'price1000'}]:[{g:100,l:'100 g',key:'price100'},{g:500,l:'500 g',key:'price500'},{g:1000,l:'1 kg',key:'price1000'}]}
 function esc(s){return String(s??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;')}
 function categoryOptions(selected){
   const active=C.categories||[];
@@ -122,9 +122,8 @@ function updateNewPriceLabels(){
 function drawRows(){
   rows.innerHTML=P.map((p,i)=>{
     const sizes=sizeConfig(p);
-    const oldPrices=isSpice(p)&&((p.price100!=null&&p.price100!=='')||(p.price500!=null&&p.price500!==''));
-    const oldNote=oldPrices&&sizes.length===3?'<div class="mini">Precios anteriores conservados: '+(p.price100!=null&&p.price100!==''?'100 g $'+Number(p.price100).toLocaleString('es-AR'):'')+(p.price100!=null&&p.price100!==''&&p.price500!=null&&p.price500!==''?' · ':'')+(p.price500!=null&&p.price500!==''?'500 g $'+Number(p.price500).toLocaleString('es-AR'):'')+'</div>':'';
-    return '<tr><td>'+(p.image?'<img class="thumb" src="'+p.image+'">':'—')+'</td><td><input value="'+esc(p.name)+'" onchange="P['+i+'].name=this.value"></td><td><select onchange="setProductCategory('+i+',this.value)">'+categoryOptions(p.cat)+'</select></td><td><input type="number" value="'+(p.cost??0)+'" onchange="P['+i+'].cost=+this.value;drawRows()"></td>'+sizes.map(x=>'<td><input style="width:100px" type="number" min="0" value="'+(p[x.key]!=null?p[x.key]:'')+'" placeholder="'+x.l+'" onchange="P['+i+'].'+x.key+'=+this.value">'+(isSpice(p)&&x.g===1000?oldNote:'')+'</td>').join('')+'<td><input type="checkbox" '+(p.available!==false?'checked':'')+' onchange="P['+i+'].available=this.checked"></td><td><input type="file" accept="image/*" onchange="photo(event,'+i+')"></td></tr>'
+    
+    return '<tr><td>'+(p.image?'<img class="thumb" src="'+p.image+'">':'—')+'</td><td><input value="'+esc(p.name)+'" onchange="P['+i+'].name=this.value"></td><td><select onchange="setProductCategory('+i+',this.value)">'+categoryOptions(p.cat)+'</select></td><td><input type="number" value="'+(p.cost??0)+'" onchange="P['+i+'].cost=+this.value;drawRows()"></td>'+sizes.map(x=>'<td><input style="width:100px" type="number" min="0" value="'+(p[x.key]!=null?p[x.key]:'')+'" placeholder="'+x.l+'" onchange="P['+i+'].'+x.key+'=+this.value">'+'</td>').join('')+'<td><input type="checkbox" '+(p.available!==false?'checked':'')+' onchange="P['+i+'].available=this.checked"></td><td><input type="file" accept="image/*" onchange="photo(event,'+i+')"></td></tr>'
   }).join('');
   refreshNewCategorySelect();
 }
@@ -140,7 +139,7 @@ function addProduct(){
   if(!Number.isFinite(p1)||p1<0||!Number.isFinite(p2)||p2<0||!Number.isFinite(p1000)||p1000<0)return addmsg.textContent='Completá los tres precios de venta.';
   if(P.some(p=>String(p.code)===String(code)))return addmsg.textContent='Ese código ya existe.';
   const category=C.categories.find(c=>categoryKey(c.name)===categoryKey(cat));if(!category)return addmsg.textContent='La categoría seleccionada no existe. Creala o seleccioná una de la lista.';
-  const f=newphoto.files[0],finish=image=>{const spice=/especias|condimentos/i.test(category.name);P.push({code,name,cat:category.name,cost,...(spice?{price50:p1,price200:p2}:{price100:p1,price500:p2}),price1000:p1000,desc:newdesc.value.trim(),available:newavailable.value==='true',image});drawRows();addmsg.className='ok';addmsg.textContent='✓ Agregado con categoría y precios definidos. Presioná GUARDAR TODO.'};
+  const f=newphoto.files[0],finish=image=>{const spice=/especias|condimentos/i.test(category.name);P.push({code,name,cat:category.name,cost,price100:p1,price500:p2,price1000:p1000,desc:newdesc.value.trim(),available:newavailable.value==='true',image});drawRows();addmsg.className='ok';addmsg.textContent='✓ Agregado con categoría y precios definidos. Presioná GUARDAR TODO.'};
   if(f){if(f.size>4*1024*1024)return alert('La foto debe pesar menos de 4 MB.');let r=new FileReader();r.onload=()=>finish(r.result);r.readAsDataURL(f)}else finish(null)
 }
 
