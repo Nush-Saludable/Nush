@@ -123,7 +123,7 @@ function drawRows(){
   rows.innerHTML=P.map((p,i)=>{
     const sizes=sizeConfig(p);
     
-    return '<tr><td>'+(p.image?'<img class="thumb" src="'+p.image+'">':'—')+'</td><td><input value="'+esc(p.name)+'" onchange="P['+i+'].name=this.value"></td><td><select onchange="setProductCategory('+i+',this.value)">'+categoryOptions(p.cat)+'</select></td><td><input type="number" value="'+(p.cost??0)+'" onchange="P['+i+'].cost=+this.value;drawRows()"></td>'+sizes.map(x=>'<td><input style="width:100px" type="number" min="0" value="'+(p[x.key]!=null?p[x.key]:'')+'" placeholder="'+x.l+'" onchange="P['+i+'].'+x.key+'=+this.value">'+'</td>').join('')+'<td><input type="checkbox" '+(p.available!==false?'checked':'')+' onchange="P['+i+'].available=this.checked"></td><td><input type="file" accept="image/*" onchange="photo(event,'+i+')"></td></tr>'
+    return '<tr><td>'+(p.image?'<img class="thumb" src="'+p.image+'">':'—')+'</td><td><input value="'+esc(p.name)+'" onchange="P['+i+'].name=this.value"></td><td><select onchange="setProductCategory('+i+',this.value)">'+categoryOptions(p.cat)+'</select></td><td><input type="number" value="'+(p.cost??0)+'" onchange="P['+i+'].cost=+this.value;drawRows()"></td>'+sizes.map(x=>'<td><input style="width:100px" type="number" min="0" value="'+(p[x.key]!=null?p[x.key]:price(p,x.g))+'" placeholder="'+x.l+'" onchange="P['+i+'].'+x.key+'=+this.value">'+'</td>').join('')+'<td><input type="checkbox" '+(p.available!==false?'checked':'')+' onchange="P['+i+'].available=this.checked"></td><td><input type="file" accept="image/*" onchange="photo(event,'+i+')"></td></tr>'
   }).join('');
   refreshNewCategorySelect();
 }
