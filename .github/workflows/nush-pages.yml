@@ -118,7 +118,7 @@ jobs:
           // Only publish settings the storefront needs; keep internal cost/margin/API fields private.
           const payment = config.checkout?.payment || {};
           const publicConfig = {
-            whatsapp:'562613631574',
+            whatsapp:'5492613631574',
             checkout:{
               promoCodes:Array.isArray(config.checkout?.promoCodes) ? config.checkout.promoCodes : [],
               shipping:config.checkout?.shipping || {},
