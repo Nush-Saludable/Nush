@@ -1,0 +1,15 @@
+name: Mantener Nush activa
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  keep-alive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Consultar endpoint de salud de Nush
+        run: |
+          curl --fail --silent --show-error --max-time 30 https://nush-8p00.onrender.com/health
