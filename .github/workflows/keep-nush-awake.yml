@@ -1,15 +1,15 @@
-name: Mantener Nush activa
+name: Verificar tienda Nush
 
 on:
   schedule:
-    - cron: "*/10 * * * *"
+    - cron: "*/30 * * * *"
   workflow_dispatch:
 
 jobs:
-  keep-alive:
+  check-storefront:
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
-      - name: Consultar endpoint de salud de Nush
+      - name: Comprobar que GitHub Pages responde
         run: |
-          curl --fail --silent --show-error --max-time 30 https://nush-8p00.onrender.com/health
+          curl --fail --silent --show-error --location --max-time 30 https://benja20br-source.github.io/Nush/ -o /dev/null
