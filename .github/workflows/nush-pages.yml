@@ -42,41 +42,12 @@ jobs:
           const products = Array.isArray(d.products) ? d.products : [];
           const config = d.config || fallback;
           console.log('CATALOG PRODUCT KEYS:', Object.keys(products[0] || {}).join(','));
-          console.log('PRODUCT IMAGE FIELDS:', JSON.stringify(['image','img','photo','imageData','imageUrl','foto','imagen','picture'].map(k => ({field:k, present:products.filter(p=>p[k]!=null && p[k]!=='').length, dataUri:products.filter(p=>typeof p[k]==='string' && /^data:image\\//i.test(p[k])).length})));
-          const crypto = require('crypto');
-          const imageDir = 'dist/images';
-          fs.mkdirSync(imageDir, { recursive: true });
-          const savedImages = new Map();
-          // Recupera las imágenes originales incrustadas en el catálogo y las publica
-          // como archivos separados para que GitHub Pages pueda mostrarlas.
-          const publicImage = value => {
-            if (typeof value !== 'string') return null;
-            const s = value.trim();
-            if (!s) return null;
-            if (/^data:image\//i.test(s)) {
-              if (savedImages.has(s)) return savedImages.get(s);
-              const match = s.match(/^data:image\/([a-zA-Z0-9.+-]+)(;base64)?,([\s\S]*)$/i);
-              if (!match) return null;
-              let bytes;
-              try {
-                bytes = match[2]
-                  ? Buffer.from(match[3].replace(/\s/g, ''), 'base64')
-                  : Buffer.from(decodeURIComponent(match[3]), 'binary');
-              } catch { return null; }
-              if (!bytes.length) return null;
-              const mime = match[1].toLowerCase();
-              const ext = ({jpeg:'jpg', 'svg+xml':'svg', 'x-icon':'ico'})[mime] || mime.split('+')[0];
-              const hash = crypto.createHash('sha256').update(bytes).digest('hex');
-              const filename = hash + '.' + ext.replace(/[^a-z0-9]/g, '');
-              fs.writeFileSync(imageDir + '/' + filename, bytes);
-              const path = './images/' + filename;
-              savedImages.set(s, path);
-              return path;
-            }
-            if (s.length > 2000) return null;
-            if (/^https?:\/\//i.test(s) || /^\.\.?\//.test(s) || /^[a-z0-9_./-]+\.(png|jpe?g|webp|gif|svg)$/i.test(s)) return s;
-            return null;
-          };
+          for (const k of ['image','img','photo','imageData','imageUrl','foto','imagen','picture']) {
+            const present = products.filter(p => p[k] != null && p[k] !== '').length;
+            const dataUri = products.filter(p => typeof p[k] === 'string' && /^data:image\\//i.test(p[k])).length;
+            console.log('IMAGE FIELD', k, 'present=', present, 'dataUri=', dataUri);
+          }
+          console.log('CATEGORY IMAGE FIELDS:', JSON.stringify((config.categories || []).slice(0,4).map(c => ({name:c.name, keys:Object.keys(c), imageType:typeof c.image, imageStart:String(c.image || '').slice(0,35)}))));
           const marginFor = (p, g) => {
             const specific = ({100:p.margin100,500:p.margin500,1000:p.margin1000})[g];
             return specific != null && specific !== '' ? Number(specific) : Number(p.margin ?? config.margin ?? 40);
