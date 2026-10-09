@@ -31,18 +31,28 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Build static storefront and public catalog
+      - name: Build optimized static storefront and public catalog
         run: |
           mkdir -p dist
-          cp index.html logo.svg favicon.svg config.json dist/
+          cp index.html logo.svg favicon.svg dist/
           node <<'NODE'
           const fs = require('fs');
           const d = JSON.parse(fs.readFileSync('catalog-data.json', 'utf8'));
+          const fallback = JSON.parse(fs.readFileSync('config.json', 'utf8'));
           const products = Array.isArray(d.products) ? d.products : [];
-          const config = d.config || {};
+          const config = d.config || fallback;
+          // Never embed base64/data-URI images in the catalog: they made the JSON ~36 MB
+          // and prevented the storefront from displaying until the whole file downloaded.
+          const publicImage = value => {
+            if (typeof value !== 'string') return null;
+            const s = value.trim();
+            if (!s || /^data:/i.test(s) || s.length > 2000) return null;
+            if (/^https?:\/\//i.test(s) || /^\.\.?\//.test(s) || /^[a-z0-9_./-]+\.(png|jpe?g|webp|gif|svg)$/i.test(s)) return s;
+            return null;
+          };
           const marginFor = (p, g) => {
             const specific = ({100:p.margin100,500:p.margin500,1000:p.margin1000})[g];
-            return specific != null && specific !== '' ? Number(specific) : Number(p.margin ?? 40);
+            return specific != null && specific !== '' ? Number(specific) : Number(p.margin ?? config.margin ?? 40);
           };
           const price = (p, g) => {
             const spice = /especias|condimentos/i.test(String(p.cat || ''));
@@ -54,7 +64,7 @@ jobs:
             const spice = /especias|condimentos/i.test(String(p.cat || ''));
             return {
               code:p.code, name:p.name, cat:p.cat, desc:p.desc || '',
-              image:p.image || null, available:p.available !== false, spice,
+              image:publicImage(p.image), available:p.available !== false, spice,
               prices: spice
                 ? {50:price(p,50),200:price(p,200),1000:price(p,1000)}
                 : {100:price(p,100),500:price(p,500),1000:price(p,1000)}
@@ -63,21 +73,42 @@ jobs:
           const map = new Map();
           for (const c of (Array.isArray(config.categories) ? config.categories : [])) {
             if (c && c.name) map.set(String(c.name).trim().toLowerCase(), {
-              name:String(c.name).trim(), image:c.image || null, active:c.active !== false
+              name:String(c.name).trim(), image:publicImage(c.image), active:c.active !== false
             });
           }
           for (const p of products) {
             const name = String(p.cat || 'Otros').trim();
             if (name && !map.has(name.toLowerCase())) map.set(name.toLowerCase(), {name,image:null,active:true});
           }
+          const publicPromotions = (Array.isArray(config.promotions) ? config.promotions : []).map(p => ({
+            id:p.id, name:p.name, desc:p.desc || '', tag:p.tag || '', price:Number(p.price || 0),
+            image:publicImage(p.image), active:p.active !== false
+          }));
           const out = {
             products:publicProducts,
-            promotions:Array.isArray(config.promotions) ? config.promotions : [],
+            promotions:publicPromotions,
             categories:[...map.values()].filter(c => c.active !== false),
             updatedAt:d.updatedAt || new Date().toISOString()
           };
           fs.writeFileSync('dist/static-catalog.json', JSON.stringify(out));
-          console.log('Public catalog built:', publicProducts.length, 'products;', fs.statSync('dist/static-catalog.json').size, 'bytes');
+          // Only publish settings the storefront needs; keep internal cost/margin/API fields private.
+          const payment = config.checkout?.payment || {};
+          const publicConfig = {
+            whatsapp:config.whatsapp || fallback.whatsapp,
+            checkout:{
+              promoCodes:Array.isArray(config.checkout?.promoCodes) ? config.checkout.promoCodes : [],
+              shipping:config.checkout?.shipping || {},
+              payment:{
+                method:payment.method || 'Transferencia a Mercado Pago',
+                alias:payment.alias || '', cvu:payment.cvu || '',
+                holder:payment.holder || ''
+              }
+            }
+          };
+          fs.writeFileSync('dist/config.json', JSON.stringify(publicConfig));
+          const bytes = fs.statSync('dist/static-catalog.json').size;
+          console.log('Public catalog built:', publicProducts.length, 'products;', bytes, 'bytes');
+          if (bytes > 2_000_000) throw new Error('Catalog remains too large (>2 MB); check product image fields.');
           NODE
       - name: Configure Pages
         uses: actions/configure-pages@v5
