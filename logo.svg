@@ -1,9 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" role="img" aria-label="Nush, Dietética y Almacén Saludable">
-<rect width="500" height="500" rx="70" fill="#f7efe2"/>
-<g fill="#5f8d2b"><path d="M250 100C206 63 207 34 214 24c31 7 48 35 36 76z"/><path d="M258 100c7-43 35-70 65-68 0 31-24 62-65 76z"/></g>
-<path d="M249 113C244 81 232 58 216 38M254 112c17-24 38-45 61-60" fill="none" stroke="#315c29" stroke-width="5" stroke-linecap="round"/>
-<text x="250" y="270" text-anchor="middle" font-family="Brush Script MT, Segoe Script, cursive" font-size="112" font-weight="600" fill="#123b25">Nush</text>
-<text x="250" y="325" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="24" letter-spacing="5" fill="#123b25">DIETÉTICA</text>
-<text x="250" y="358" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" letter-spacing="2.2" fill="#123b25">Y ALMACÉN SALUDABLE</text>
-<path d="M165 390h70m30 0h70" stroke="#71913a" stroke-width="2"/><path d="M250 379c-20-15-26-29-22-40 17 4 25 16 22 40zm3 0c2-17 12-29 27-30 1 14-10 27-27 30z" fill="#71913a"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 420" role="img" aria-label="Nush, Dietética y Almacén Saludable">
+<rect width="820" height="420" rx="30" fill="#f7efe2"/>
+<g fill="#5f8d2b"><path d="M394 82C344 45 347 15 355 7c35 8 54 39 40 82z"/><path d="M407 83c8-48 39-77 72-75 0 34-27 69-72 83z"/></g>
+<path d="M393 99C387 65 374 42 356 22M400 98c19-26 42-49 68-66" fill="none" stroke="#315c29" stroke-width="5" stroke-linecap="round"/>
+<text x="410" y="244" text-anchor="middle" font-family="'Brush Script MT','Segoe Script',cursive" font-size="175" font-style="italic" fill="#092c1a">Nush</text>
+<text x="410" y="302" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="25" letter-spacing="7" fill="#092c1a">DIETÉTICA</text>
+<text x="410" y="337" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="19" letter-spacing="3.5" fill="#092c1a">Y ALMACÉN SALUDABLE</text>
+<path d="M272 370h116m44 0h116" stroke="#71913a" stroke-width="3"/><path d="M410 367c-23-17-29-33-24-45 19 4 28 18 24 45zm5 0c3-19 14-33 31-34 1 16-11 31-31 34z" fill="#71913a"/>
 </svg>
