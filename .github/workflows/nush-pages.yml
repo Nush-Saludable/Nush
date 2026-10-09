@@ -44,7 +44,7 @@ jobs:
           console.log('CATALOG PRODUCT KEYS:', Object.keys(products[0] || {}).join(','));
           for (const k of ['image','img','photo','imageData','imageUrl','foto','imagen','picture']) {
             const present = products.filter(p => p[k] != null && p[k] !== '').length;
-            const dataUri = products.filter(p => typeof p[k] === 'string' && /^data:image\\//i.test(p[k])).length;
+            const dataUri = products.filter(p => typeof p[k] === 'string' && p[k].toLowerCase().startsWith('data:image/')).length;
             console.log('IMAGE FIELD', k, 'present=', present, 'dataUri=', dataUri);
           }
           console.log('CATEGORY IMAGE FIELDS:', JSON.stringify((config.categories || []).slice(0,4).map(c => ({name:c.name, keys:Object.keys(c), imageType:typeof c.image, imageStart:String(c.image || '').slice(0,35)}))));
