@@ -52,7 +52,7 @@ jobs:
             if (!s) return null;
             if (s.toLowerCase().startsWith('data:image/')) {
               if (savedImages.has(s)) return savedImages.get(s);
-              const match = s.match(/^data:image\/([a-zA-Z0-9.+-]+)(;base64)?,([\\s\\S]*)$/i);
+              const match = s.match(/^data:image\/([a-zA-Z0-9.+-]+)(;base64)?,([\s\S]*)$/i);
               if (!match) return null;
               let bytes;
               try {
