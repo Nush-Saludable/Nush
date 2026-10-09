@@ -53,12 +53,12 @@ jobs:
             if (!s) return null;
             if (/^data:image\//i.test(s)) {
               if (savedImages.has(s)) return savedImages.get(s);
-              const match = s.match(/^data:image\/([a-zA-Z0-9.+-]+)(;base64)?,([\\s\\S]*)$/i);
+              const match = s.match(/^data:image\/([a-zA-Z0-9.+-]+)(;base64)?,([\s\S]*)$/i);
               if (!match) return null;
               let bytes;
               try {
                 bytes = match[2]
-                  ? Buffer.from(match[3].replace(/\\s/g, ''), 'base64')
+                  ? Buffer.from(match[3].replace(/\s/g, ''), 'base64')
                   : Buffer.from(decodeURIComponent(match[3]), 'binary');
               } catch { return null; }
               if (!bytes.length) return null;
@@ -72,7 +72,7 @@ jobs:
               return path;
             }
             if (s.length > 2000) return null;
-            if (/^https?:\\/\\//i.test(s) || /^\\.\\.?\\//.test(s) || /^[a-z0-9_./-]+\\.(png|jpe?g|webp|gif|svg)$/i.test(s)) return s;
+            if (/^https?:\/\//i.test(s) || /^\.\.?\//.test(s) || /^[a-z0-9_./-]+\.(png|jpe?g|webp|gif|svg)$/i.test(s)) return s;
             return null;
           };
           const marginFor = (p, g) => {
