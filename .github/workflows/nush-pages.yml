@@ -1,0 +1,97 @@
+name: Deploy Nush free static storefront
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'logo.svg'
+      - 'favicon.svg'
+      - 'config.json'
+      - 'catalog-data.json'
+      - '.github/workflows/nush-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Build static storefront and public catalog
+        run: |
+          mkdir -p dist
+          cp index.html logo.svg favicon.svg config.json dist/
+          node <<'NODE'
+          const fs = require('fs');
+          const d = JSON.parse(fs.readFileSync('catalog-data.json', 'utf8'));
+          const products = Array.isArray(d.products) ? d.products : [];
+          const config = d.config || {};
+          const marginFor = (p, g) => {
+            const specific = ({100:p.margin100,500:p.margin500,1000:p.margin1000})[g];
+            return specific != null && specific !== '' ? Number(specific) : Number(p.margin ?? 40);
+          };
+          const price = (p, g) => {
+            const spice = /especias|condimentos/i.test(String(p.cat || ''));
+            const direct = spice ? ({50:p.price100,200:p.price500,1000:p.price1000})[g] : ({100:p.price100,500:p.price500,1000:p.price1000})[g];
+            if (direct != null && direct !== '' && Number.isFinite(Number(direct))) return Number(direct);
+            return Math.round(Number(p.cost || 0) * g / 1000 * (1 + marginFor(p,g) / 100));
+          };
+          const publicProducts = products.map(p => {
+            const spice = /especias|condimentos/i.test(String(p.cat || ''));
+            return {
+              code:p.code, name:p.name, cat:p.cat, desc:p.desc || '',
+              image:p.image || null, available:p.available !== false, spice,
+              prices: spice
+                ? {50:price(p,50),200:price(p,200),1000:price(p,1000)}
+                : {100:price(p,100),500:price(p,500),1000:price(p,1000)}
+            };
+          });
+          const map = new Map();
+          for (const c of (Array.isArray(config.categories) ? config.categories : [])) {
+            if (c && c.name) map.set(String(c.name).trim().toLowerCase(), {
+              name:String(c.name).trim(), image:c.image || null, active:c.active !== false
+            });
+          }
+          for (const p of products) {
+            const name = String(p.cat || 'Otros').trim();
+            if (name && !map.has(name.toLowerCase())) map.set(name.toLowerCase(), {name,image:null,active:true});
+          }
+          const out = {
+            products:publicProducts,
+            promotions:Array.isArray(config.promotions) ? config.promotions : [],
+            categories:[...map.values()].filter(c => c.active !== false),
+            updatedAt:d.updatedAt || new Date().toISOString()
+          };
+          fs.writeFileSync('dist/static-catalog.json', JSON.stringify(out));
+          console.log('Public catalog built:', publicProducts.length, 'products;', fs.statSync('dist/static-catalog.json').size, 'bytes');
+          NODE
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Upload static site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Publish Nush
+        id: deployment
+        uses: actions/deploy-pages@v4
