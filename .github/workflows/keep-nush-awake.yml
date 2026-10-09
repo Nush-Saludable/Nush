@@ -12,4 +12,4 @@ jobs:
     steps:
       - name: Comprobar que GitHub Pages responde
         run: |
-          curl --fail --silent --show-error --location --max-time 30 https://benja20br-source.github.io/Nush/ -o /dev/null
+          curl --fail --silent --show-error --location --max-time 30 https://nush-saludable.github.io/Nush/ -o /dev/null
