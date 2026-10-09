@@ -41,6 +41,8 @@ jobs:
           const fallback = JSON.parse(fs.readFileSync('config.json', 'utf8'));
           const products = Array.isArray(d.products) ? d.products : [];
           const config = d.config || fallback;
+          console.log('CATALOG PRODUCT KEYS:', Object.keys(products[0] || {}).join(','));
+          console.log('PRODUCT IMAGE FIELDS:', JSON.stringify(['image','img','photo','imageData','imageUrl','foto','imagen','picture'].map(k => ({field:k, present:products.filter(p=>p[k]!=null && p[k]!=='').length, dataUri:products.filter(p=>typeof p[k]==='string' && /^data:image\\//i.test(p[k])).length})));
           const crypto = require('crypto');
           const imageDir = 'dist/images';
           fs.mkdirSync(imageDir, { recursive: true });
