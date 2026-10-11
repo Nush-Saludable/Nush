@@ -11,6 +11,8 @@ body{font-family:Arial;margin:0;background:#f7efe2;color:#1f2c22}header{backgrou
 <header><b style="font-size:25px;letter-spacing:3px">Nush</b><br>Panel de administración</header>
 <main id="app"></main>
 <script>
+const API_BASE='https://nush-8p00.onrender.com';
+async function apiFetch(path,options={}){return fetch(API_BASE+path,options)}
 const app=document.getElementById('app');
 let P=[],C={},pass='';
 
@@ -42,7 +44,7 @@ function normalizeCategories(d){
 async function doLogin(){
   pass=pw.value;
   try{
-    const r=await fetch('/api/admin/catalog',{headers:{'x-admin-password':pass}});if(!r.ok)throw 0;
+    const r=await apiFetch('/api/admin/catalog',{headers:{'x-admin-password':pass}});if(!r.ok)throw 0;
     const d=await r.json();P=d.products||[];C=d.config||{};C.promotions=C.promotions||[];C.categories=normalizeCategories(d);draw();
   }catch(e){msg.className='err';msg.textContent='Contraseña incorrecta.'}
 }
@@ -152,10 +154,10 @@ async function save(){
  statusEl.className='save-wait';statusEl.innerHTML='🟡 <b>GUARDANDO CAMBIOS...</b><br>Enviando el catálogo al servidor. No cierres esta página.';btn.disabled=true;btn.textContent='⏳ GUARDANDO...';
  try{
   const expectedProducts=JSON.stringify(P),expectedPromos=JSON.stringify(C.promotions||[]),expectedCategories=JSON.stringify(C.categories||[]);
-  let r=await fetch('/api/admin/catalog',{method:'PUT',headers:{'Content-Type':'application/json','x-admin-password':pass},body:JSON.stringify({products:P,config:C})});
+  let r=await apiFetch('/api/admin/catalog',{method:'PUT',headers:{'Content-Type':'application/json','x-admin-password':pass},body:JSON.stringify({products:P,config:C})});
   let j=await r.json();if(!r.ok)throw new Error(j.message||'El servidor rechazó el guardado.');
   statusEl.innerHTML='🟡 <b>GUARDADO RECIBIDO. VERIFICANDO...</b><br>Volviendo a leer los datos del servidor.';
-  let check=await fetch('/api/admin/catalog?verify='+Date.now(),{headers:{'x-admin-password':pass},cache:'no-store'});if(!check.ok)throw new Error('Se guardó, pero no pudimos verificar la lectura posterior.');
+  let check=await apiFetch('/api/admin/catalog?verify='+Date.now(),{headers:{'x-admin-password':pass},cache:'no-store'});if(!check.ok)throw new Error('Se guardó, pero no pudimos verificar la lectura posterior.');
   let saved=await check.json();
   if(JSON.stringify(saved.products||[])!==expectedProducts||JSON.stringify((saved.config||{}).promotions||[])!==expectedPromos||JSON.stringify((saved.config||{}).categories||[])!==expectedCategories)throw new Error('Los datos recuperados no coinciden con lo que acabás de guardar.');
   const now=new Date().toLocaleString('es-AR');statusEl.className='save-ok';statusEl.innerHTML='🟢 <b>CAMBIOS GUARDADOS Y VERIFICADOS</b><br>Productos, imágenes, precios, márgenes, disponibilidad, categorías y promociones quedaron confirmados en el servidor.<br><span class="muted">Última verificación: '+now+'</span>';lastEl.textContent='Último guardado confirmado: '+now;localStorage.setItem('nush_last_confirmed_save',now)
@@ -163,7 +165,7 @@ async function save(){
  finally{btn.disabled=false;btn.textContent='💾 GUARDAR TODO'}
 }
 
-async function sync(){const statusEl=document.getElementById('status');statusEl.textContent='Consultando Mayah...';try{let r=await fetch('/api/admin/sync-mayah',{method:'POST',headers:{'x-admin-password':pass}});let j=await r.json();if(!r.ok)throw new Error(j.message);let d=await(await fetch('/api/admin/catalog',{headers:{'x-admin-password':pass}})).json();P=d.products||[];C=d.config||{};C.promotions=C.promotions||[];C.categories=normalizeCategories(d);draw();statusEl.className='ok';statusEl.textContent='✓ Costos actualizados desde Mayah: '+j.changed+' productos.'}catch(e){statusEl.className='err';statusEl.textContent='No se pudo actualizar: '+e.message}}
+async function sync(){const statusEl=document.getElementById('status');statusEl.textContent='Consultando Mayah...';try{let r=await apiFetch('/api/admin/sync-mayah',{method:'POST',headers:{'x-admin-password':pass}});let j=await r.json();if(!r.ok)throw new Error(j.message);let d=await(await apiFetch('/api/admin/catalog',{headers:{'x-admin-password':pass}})).json();P=d.products||[];C=d.config||{};C.promotions=C.promotions||[];C.categories=normalizeCategories(d);draw();statusEl.className='ok';statusEl.textContent='✓ Costos actualizados desde Mayah: '+j.changed+' productos.'}catch(e){statusEl.className='err';statusEl.textContent='No se pudo actualizar: '+e.message}}
 function logout(){pass='';login()}
 login();
 </script>
