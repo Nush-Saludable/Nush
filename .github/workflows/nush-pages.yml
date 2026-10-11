@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'index.html'
+      - 'admin.html'
       - 'logo.svg'
       - 'favicon.svg'
       - 'config.json'
@@ -34,7 +35,7 @@ jobs:
       - name: Build optimized static storefront and public catalog
         run: |
           mkdir -p dist
-          cp index.html logo.svg favicon.svg dist/
+          cp index.html admin.html logo.svg favicon.svg dist/
           node <<'NODE'
           const fs = require('fs');
           const d = JSON.parse(fs.readFileSync('catalog-data.json', 'utf8'));
