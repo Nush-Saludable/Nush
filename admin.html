@@ -44,9 +44,10 @@ function normalizeCategories(d){
 async function doLogin(){
   pass=pw.value;
   try{
-    const r=await apiFetch('/api/admin/catalog',{headers:{'x-admin-password':pass}});if(!r.ok)throw 0;
+    const r=await apiFetch('/api/admin/catalog',{headers:{'x-admin-password':pass},cache:'no-store'});
+    if(!r.ok){let detail='';try{const body=await r.json();detail=body.message||''}catch(_){};throw new Error('El servidor respondió '+r.status+(detail?': '+detail:''));}
     const d=await r.json();P=d.products||[];C=d.config||{};C.promotions=C.promotions||[];C.categories=normalizeCategories(d);draw();
-  }catch(e){msg.className='err';msg.textContent='Contraseña incorrecta.'}
+  }catch(e){msg.className='err';msg.textContent='No se pudo ingresar: '+(e&&e.message?e.message:'falló la conexión con el servidor')+'. Revisá tu conexión y probá nuevamente.'}
 }
 
 function legacyPrice(p,g){return Math.round(Number(p.cost||0)*g/1000*(1+Number(p['margin'+g]??p.margin??40)/100))}
