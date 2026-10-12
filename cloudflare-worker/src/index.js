@@ -46,8 +46,22 @@ async function readCatalog(env) {
   const r = await github(FILE + "?ref=" + encodeURIComponent(BRANCH), env);
   if (!r.ok) throw new Error("No se pudo leer el catálogo de GitHub (" + r.status + ")");
   const data = await r.json();
-  if (!data.content) throw new Error("GitHub devolvió un catálogo vacío");
-  return { catalog: JSON.parse(decodeBase64Utf8(data.content)), sha: data.sha };
+  let catalogText = "";
+  if (typeof data.content === "string" && data.content.trim()) {
+    catalogText = decodeBase64Utf8(data.content);
+  } else {
+    // GitHub puede omitir el contenido en la API Contents cuando el archivo es grande.
+    // En ese caso, leer el archivo desde la URL raw pública del repositorio.
+    const rawUrl = data.download_url || ("https://raw.githubusercontent.com/" + REPO + "/" + BRANCH + "/" + FILE);
+    const raw = await fetch(rawUrl, { headers: { "Cache-Control": "no-cache" } });
+    if (!raw.ok) throw new Error("GitHub no entregó el catálogo por la API ni por descarga directa (" + raw.status + ")");
+    catalogText = await raw.text();
+  }
+  if (!catalogText.trim()) throw new Error("GitHub devolvió un catálogo vacío");
+  let catalog;
+  try { catalog = JSON.parse(catalogText); }
+  catch { throw new Error("El catálogo de GitHub no contiene JSON válido"); }
+  return { catalog, sha: data.sha };
 }
 async function saveCatalog(env, catalog) {
   const current = await github(FILE + "?ref=" + encodeURIComponent(BRANCH), env);
